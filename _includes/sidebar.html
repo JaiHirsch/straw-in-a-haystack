@@ -1,0 +1,22 @@
+<h3> About Me</h3>
+
+<div class="contact">
+  <p>
+    Jai Hirsch<br />
+    Senior Systems Architect<br />
+    CARFAX<br>
+    jai.hirsch@gmail.com
+  </p>
+  </div>
+  <div class="contact">
+    <p>
+      <a href="https://github.com/JaiHirsch">github.com/JaiHirsch</a><br />
+      <a href="https://twitter.com/JaiHirsch">twitter.com/JaiHirsch</a><br />
+   </p>
+</div>
+
+<ul>
+  {% for post in site.posts limit: 5 %}
+    <li><a href="{{site.baseurl}}/{{ post.url }}">{{ post.title }}</a></li>
+  {% endfor %}
+</ul>
