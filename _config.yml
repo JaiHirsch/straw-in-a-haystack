@@ -1,6 +1,7 @@
 name: Straw in a Haystack
-description: Random thoughts on programming, MongoDB, and more
+description: Random thoughts on programming, MongoDB, and more by Jai Hirsch
 baseurl: /straw-in-a-haystack
+url: http://jaihirsch.github.io/straw-in-a-haystack/
 
 paginate: 10
 

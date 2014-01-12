@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+        <channel>
+                <title>Straw in a Haystack - Links</title>
+                <description>Random thoughts on programming, MongoDB, and more by Jai Hirsch</description>
+                <link>http://jaihirsch.github.io/straw-in-a-haystack/</link>
+                <atom:link href="http://jaihirsch.github.io/straw-in-a-haystack//feed.links.xml" rel="self" type="application/rss+xml" />
+                
+                        
+                
+                        
+                
+        </channel>
+</rss>
