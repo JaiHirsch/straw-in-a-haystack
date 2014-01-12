@@ -46,11 +46,7 @@
     <div class="container">
 <div class="container">
   <div class="col-xs-8">
-    <h2>CARFAX vehicle history database migration to MongoDB</h2>
-<p class="meta">06 Jan 2014</p>
-
-<div class="post">
-<h3>Why we decided to move over eleven billion records from the legacy system</h3>
+    <h3>Why we decided to move over eleven billion records from the legacy system</h3>
 
 <p>The legacy vehicle history database is a distributed key value store using an ISAM 
 (Indexed Sequential Access Method) database on <a href="http://en.wikipedia.org/wiki/OpenVMS">OpenVMS</a>.  
@@ -130,8 +126,6 @@ the MongoDB collection was actually slightly smaller than the original database 
   <li>We attempted at one point to break the dataset down into a massive number of collections due to the collection level locking in MongoDB, however, the rebalancing of so many collections destroyed our ability to insert and we reverted back to a single large collection.
   <li>In a large sharded collection make sure that queries that need to return quickly use the shard key.
 </ul>
-
-</div>
 
   </div>
   <div class="col-xs-4">
