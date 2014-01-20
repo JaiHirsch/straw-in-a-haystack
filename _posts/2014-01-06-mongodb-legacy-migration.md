@@ -4,7 +4,7 @@ title:  "CARFAX vehicle history migration to MongoDB"
 categories: mongoDB
 ---
 
-My appologies to the community, but I have been asked to take this post down.
+My apologies to the community, but I have been asked to take this post down.
 
 Here is a link to the official Carfax statement
 
