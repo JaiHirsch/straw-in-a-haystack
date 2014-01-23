@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+        <channel>
+                <title>Straw in a Haystack - Miscellaneous</title>
+                <description>Posts categorized as 'miscellaneous'</description>
+                <link>http://jaihirsch.github.io/straw-in-a-haystack/</link>
+                <atom:link href="http://jaihirsch.github.io/straw-in-a-haystack//feed.category.xml" rel="self" type="application/rss+xml" />
+                
+        </channel>
+</rss>

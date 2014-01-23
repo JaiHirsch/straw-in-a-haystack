@@ -3,8 +3,12 @@
   <head>
     <meta charset="utf-8">
     <title>Straw in a Haystack</title>
+    <link rel="alternate" type="application/rss+xml" title="RSS"
+      href="http://jaihirsch.github.io/straw-in-a-haystack/">
+    <base href="/straw-in-a-haystack">
+    <link rel="alternate" type="application/rss+xml" href="rss-feed">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Random thoughts on programming, MongoDB, and more">
+    <meta name="description" content="Random thoughts on programming, MongoDB, and more by Jai Hirsch">
 
     <link href="/straw-in-a-haystack/css/bootstrap.css" rel="stylesheet">
     <style>
@@ -23,7 +27,7 @@
   <body>    
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-header">
-        <a class="brand" href="/straw-in-a-haystack#">Straw in a Haystack</a>
+        <a class="brand" href="http://jaihirsch.github.io/straw-in-a-haystack/">Straw in a Haystack</a>
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
@@ -42,11 +46,7 @@
     <div class="container">
 <div class="container">
   <div class="col-xs-8">
-    <h2>Thoughts On Leadership</h2>
-<p class="meta">06 Jan 2014</p>
-
-<div class="post">
-<blockquote>Good leaders make people feel that they&#8217;re at the very heart of things, <br />
+    <blockquote>Good leaders make people feel that they&#8217;re at the very heart of things, <br />
 not at the periphery. Everyone feels that he or she makes a difference to the success <br />
 of the organization. When that happens people feel centered and that gives their work <br />
 meaning.<br>
@@ -72,8 +72,6 @@ of others, offer them council to pursue and realize their passions.</p>
   <li><p>Innovation is often a key to success.  Companies can become bogged down in process and old technologies that allow newer more agile companies to beat them in the market place.  However, change is not always better.  It is very important to weigh doing something just because it is new versus a proven and stable process.</p>
   <li><p>Courage to do the right thing.  The trick is knowing what the right thing is.  Leaders must champion causes that need to be brought forward.  It is also their responsibility to challenge teams and departments that the cause is worth championing.</p>
 </ul>
-</div>
-
   </div>
   <div class="col-xs-4">
     <h3> About Me</h3>
@@ -83,7 +81,7 @@ of others, offer them council to pursue and realize their passions.</p>
     Jai Hirsch<br />
     Senior Systems Architect<br />
     CARFAX<br>
-    jai.hirsch@gmail.com
+    hirschjai@gmail.com
   </p>
   </div>
   <div class="contact">
@@ -97,25 +95,25 @@ of others, offer them council to pursue and realize their passions.</p>
   
     <li><a href="/straw-in-a-haystack//leadership/2014/01/06/thoughts-on-leadership/">Thoughts On Leadership</a></li>
   
-    <li><a href="/straw-in-a-haystack//mongodb/2014/01/06/mongodb-legacy-migration/">CARFAX vehicle history database migration to MongoDB</a></li>
+    <li><a href="/straw-in-a-haystack//mongodb/2014/01/06/mongodb-legacy-migration/">CARFAX vehicle history migration to MongoDB</a></li>
   
 </ul>
   </div>
 </div>
-  </div>
-
-    <script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
     var disqus_shortname = 'strawinahaystack'; // required: replace example with your forum shortname
 
     /* * * DON'T EDIT BELOW THIS LINE * * */
-    (function () {
-        var s = document.createElement('script'); s.async = true;
-        s.type = 'text/javascript';
-        s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-        (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-    }());
-    </script>
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
     
   </body>
 </html>

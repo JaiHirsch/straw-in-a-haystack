@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8">
     <title>{{ site.name }}</title>
+    <link rel="alternate" type="application/rss+xml" title="RSS"
+      href="{{site.url}}">
+    <base href="{{site.baseurl}}">
+    <link rel="alternate" type="application/rss+xml" href="rss-feed">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{ site.description }}">
 
@@ -23,7 +27,7 @@
   <body>    
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-header">
-        <a class="brand" href="{{site.baseurl}}#">{{ site.name }}</a>
+        <a class="brand" href="{{site.url}}">{{ site.name }}</a>
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>

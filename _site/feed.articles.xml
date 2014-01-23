@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+        <channel>
+                <title>Straw in a Haystack - Articles</title>
+                <description>Random thoughts on programming, MongoDB, and more by Jai Hirsch</description>
+                <link>http://jaihirsch.github.io/straw-in-a-haystack/</link>
+                <atom:link href="http://jaihirsch.github.io/straw-in-a-haystack//feed.articles.xml" rel="self" type="application/rss+xml" />
+                
+                        
+                        <item>
+                                <title>Thoughts On Leadership</title>
+                                <description>&lt;blockquote&gt;Good leaders make people feel that they&amp;#8217;re at the very heart of things, &lt;br /&gt;
+not at the periphery. Everyone feels that he or she makes a difference to the success &lt;br /&gt;
+of the organization. When that happens people feel centered and that gives their work &lt;br /&gt;
+meaning.&lt;br&gt;
+- Warren G. Bennis&lt;/blockquote&gt;
+&lt;p&gt;The basis for leadership should be trust.  Building relationships of trust requires &lt;br /&gt;
+strength of character and competency.  Trust must be bidirectional.  When people know &lt;br /&gt;
+they are trusted to do their job well, they will strive to do so.  People must also be &lt;br /&gt;
+able to trust their leadership team.  Trust is built through (but not limited to) &lt;br /&gt;
+consistency, collaboration, caring, understanding, and integrity.  The next level of &lt;br /&gt;
+leadership should be to present a clear vision of purpose.  People must be involved in &lt;br /&gt;
+and understand the goals that need to be achieved.  By involving everyone they will &amp;#8220;own&amp;#8221; &lt;br /&gt;
+the process and a unified vision of mission, values and goals may be created.  The reward &lt;br /&gt;
+of great leadership is the unleashing of talent.  Great leadership empowers people to &lt;br /&gt;
+fully utilize their intelligence, creativity, and resourcefulness. It is the responsibility &lt;br /&gt;
+of a leader to inspire and bring out the best in people.  Do not focus solely on the strengths &lt;br /&gt;
+of others, offer them council to pursue and realize their passions.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Here&amp;#8217;s what I love about leadership, coaching, team-building, and development: &lt;/b&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;p&gt;Helping people look at problems from multiple angles.  Often people get caught in the minutia of what is at hand and have trouble seeing the problem in a larger context.  I learned the power of this as a calculus tutor and there is no greater moment for a coach or instructor than the light bulb moment.&lt;/p&gt;
+  &lt;li&gt;&lt;p&gt;Aligning what people are passionate about with their career goals.  When people love what they are doing they will do their best.  People are not cogs in a machine and need to feel respected and fulfilled by their work.&lt;/p&gt;
+  &lt;li&gt;&lt;p&gt;Working with others to learn and find patterns of success.  I am very passionate about learning and teaching.  While I believe software should do one thing and do it well, I believe people should be willing to learn, understand, and apply ideas from various fields.  Some of my own greatest success has come from applying patters and systems from one field to another.&lt;/p&gt;
+  &lt;li&gt;&lt;p&gt;The process of continual improvement.  I strive to make myself and those around me better every day.&lt;/p&gt;
+  &lt;li&gt;&lt;p&gt;Innovation is often a key to success.  Companies can become bogged down in process and old technologies that allow newer more agile companies to beat them in the market place.  However, change is not always better.  It is very important to weigh doing something just because it is new versus a proven and stable process.&lt;/p&gt;
+  &lt;li&gt;&lt;p&gt;Courage to do the right thing.  The trick is knowing what the right thing is.  Leaders must champion causes that need to be brought forward.  It is also their responsibility to challenge teams and departments that the cause is worth championing.&lt;/p&gt;
+&lt;/ul&gt;</description>
+                                <pubDate>Mon, 06 Jan 2014 00:00:00 -0600</pubDate>
+                                <link>http://jaihirsch.github.io/straw-in-a-haystack///leadership/2014/01/06/thoughts-on-leadership/</link>
+                                <guid isPermaLink="true">http://jaihirsch.github.io/straw-in-a-haystack///leadership/2014/01/06/thoughts-on-leadership/</guid>
+                        </item>
+                        
+                
+                        
+                        <item>
+                                <title>CARFAX vehicle history migration to MongoDB</title>
+                                <description>&lt;h3&gt;Why we decided to move over eleven billion records from the legacy system&lt;/h3&gt;
+
+&lt;p&gt;The legacy vehicle history database is a distributed key value store on &lt;a href=&quot;http://en.wikipedia.org/wiki/OpenVMS&quot;&gt;OpenVMS&lt;/a&gt;. Compressed the database is roughly nine terabytes.  This system has served &lt;a href=&quot;http://www.carfax.com/entry.cfx&quot;&gt;CARFAX&lt;/a&gt; very well since 1984 when the company was founded, but we were capping on the number of reports per second that could be delivered per production cluster.  The hardware cost and technical difficulties of scaling the legacy system were very high.  Thus we decided to start looking at different options.&lt;/p&gt;
+
+&lt;h3&gt;Why we decided to use MongoDB&lt;/h3&gt;
+
+&lt;p&gt;As an Agile and extreme programming development shop, CARFAX uses Friday afternoons as professional/personal development time.  Several developers began using this time to experimenting with traditional RDBMS and NoSQL solutions for the vehicle history database.  The complexity of the data structures compounded with the size of the database did not lend itself to &lt;a href=&quot;http://www.oracle.com/index.html&quot;&gt;Oracle&lt;/a&gt; or &lt;a href=&quot;http://www.mysql.com/&quot;&gt;MySql&lt;/a&gt;.  We also evaluated &lt;a href=&quot;http://cassandra.apache.org/&quot;&gt;Cassandra&lt;/a&gt;, &lt;a href=&quot;http://couchdb.apache.org/&quot;&gt;CouchDB&lt;/a&gt;, &lt;a href=&quot;http://basho.com/riak/&quot;&gt;Riak&lt;/a&gt;, and several other NoSQL solutions (I really wanted to use &lt;a href=&quot;http://www.neo4j.org/&quot;&gt;Neo4J&lt;/a&gt; to create a social network of cars).  In the end we decided that MongoDB gave us the best of where we wanted to be in the &lt;a href=&quot;http://en.wikipedia.org/wiki/CAP_theorem&quot;&gt;CAP theorem&lt;/a&gt; and offered the level of commercial support we were looking for.&lt;/p&gt;
+
+&lt;h3&gt;Challenges we faced during the migration&lt;/h3&gt;
+
+&lt;p&gt;
+Cleansing, transforming, and inserting eleven billion complex records into a database is no small task. To avoid inconsistencies with the
+ ongoing data feeds it was decided that we needed to load the existing records into MongoDB in under fifteen days. The legacy records were 
+of multiple formats that required specific interpretations.  Many of the records were also inserted using PL/I data structures that have no
+ direct mapping in Java or C and required bitmapping and other fun tricks.  Once we wrote the Java and C JNI algorithms to transform the old
+ records to the MongoDB format we began our loads.
+&lt;/p&gt;
+
+&lt;p&gt;
+MongoDB does not support OpenVMS and as such we had to use remote MongoS processes to load the data. Using direct inserts to MongoDB we opened 
+up the queues.  The process was immediately computationally bound.  The poor processers on the OpenVMS boxes were running full tilt; we could 
+barely even get a command prompt to check on the system.  We managed to throttle back the queues so we could get a stable session, but the projected
+ extract, transform, and load time was at forty five days.  We let the loads continue but we went back to the drawing board to consider how to 
+solve the computational limitations we had hit.
+&lt;/p&gt; 
+
+&lt;p&gt;&lt;img src=&quot;/straw-in-a-haystack/images/vms_direct_insert.jpg&quot; alt=&quot;Direct load to MongoDB&quot;&gt;&lt;/p&gt;
+
+&lt;h3&gt;The Solution&lt;/h3&gt;
+
+&lt;p&gt;The transformation and insertion logic was already pretty clean and stateless so with a modest amount work we were able to implement a multi-threaded
+ and multi-JVM RabbitMQ solution.  We had some servers that were slated to become app-servers that were not being used yet so we deployed the RabbitMQ
+servers and lots of consumer process onto them.  We released the queues.  The initial numbers did not look all that promising, but once the shard 
+ranges on MongoDB settled in we began to see very impressive load numbers.  We averaged over eleven thousand plus writes a second to MongoDB.&lt;br&gt;
+We finished the load in just under ten days.  Through judicious use of compression of certain fields that are not useful for normal queries or 
+aggregation the MongoDB collection was actually slightly smaller than the original database on OpenVMS.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/straw-in-a-haystack/images/rabbit_insert.jpg&quot; alt=&quot;Direct load to MongoDB&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;Successes of the Migration
+&lt;ul&gt;
+  &lt;li&gt;Each replica set in the production cluster is capable of producing an order of magnitude more reports per second than the old system.
+  &lt;li&gt;They legacy system could only answer one question easily:  What are the records for a given vehicle?  Any others queries required a custom C crawler and could take weeks return the answers.  In MongoDB we are able to product many useful reports from the data much faster.
+  &lt;li&gt;Setting up a new cluster in the legacy system was an extensive process.  We can stand up a new replica set in MongoDB in about two days.  This is only possible through the use of automation.  Automate EVERYTHING.
+  &lt;li&gt;Cross datacenter data publication and synchronization was error prone and complicated under the old system.  In MongoDB we are generally only a few seconds behind in our various data centers.
+&lt;/ul&gt;
+Other Thoughts:
+&lt;ul&gt;
+  &lt;li&gt;If you are using a Linux distribution; &lt;b&gt;check that you are not using the default ulimit settings!&lt;/b&gt;  We suffered a massive cascading crash due to missing this in our initial automation settings.
+  &lt;li&gt;Moving terabytes of data though an internal network is a challenge.  Work very closely with your network team to make sure everyone is ready for the traffic.
+  &lt;li&gt;Naming conventions for the fields in your MongoDB schema are very important!  Due to the BSON format, remember that every character counts in large implementations.
+  &lt;li&gt;Consider your shard keys very carefully!  Indexes on extensive collections use a lot of RAM.  We chose a shard key that maximized read and write performance but it was not the _id field.  This forced us into a two index situation.  The _id index is only used for updates and deletes which are relatively infrequent in this system.
+  &lt;li&gt;If you are computationally bound, figure out how to grid out the problem.  RabbitMQ worked well in our case, but carefully consider your problem domain and figure out what is the best solution.  We also considered 0MQ and GridGain either would have been great choices but we decided upon RabbitMQ mostly due to in-house knowledge.  We are currently evaluating moving our distributed load process to Scala and Akka.
+  &lt;li&gt;For high volume inserts the more shards the better (and LOTS of RAM)!  Managing those shards can be tricky but it pays off.
+  &lt;li&gt;We attempted at one point to break the dataset down into a massive number of collections due to the collection level locking in MongoDB, however, the rebalancing of so many collections destroyed our ability to insert and we reverted back to a single large collection.
+  &lt;li&gt;In a large sharded collection make sure that queries that need to return quickly use the shard key.  Otherwise you are forced into a scatter/gather query.
+  &lt;li&gt;The project was ultimately only a success due the amazing team at Carfax.  If you love data and are looking for an excellent career opportunity we are always looking for good people to &lt;a href=&quot;http://hire.jobvite.com/CompanyJobs/Careers.aspx?k=JobListing&amp;c=qLi9VfwR&amp;v=1&quot;&gt;join us&lt;/a&gt;.
+&lt;/ul&gt;&lt;/p&gt;
+
+&lt;p&gt;A special thanks goes out to Brendan McAdams (@rit on Twitter) for helping us in our initial development phase!&lt;/p&gt;
+
+&lt;p&gt;Here is a link to the official Carfax statement on the migration to MongoDB:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.mongodb.com/press/carfax-selects-mongodb-power-11-billion-record-database&quot;&gt;http://www.mongodb.com/press/carfax-selects-mongodb-power-11-billion-record-database&lt;/a&gt;&lt;/p&gt;
+</description>
+                                <pubDate>Mon, 06 Jan 2014 00:00:00 -0600</pubDate>
+                                <link>http://jaihirsch.github.io/straw-in-a-haystack///mongodb/2014/01/06/mongodb-legacy-migration/</link>
+                                <guid isPermaLink="true">http://jaihirsch.github.io/straw-in-a-haystack///mongodb/2014/01/06/mongodb-legacy-migration/</guid>
+                        </item>
+                        
+                
+        </channel>
+</rss>
