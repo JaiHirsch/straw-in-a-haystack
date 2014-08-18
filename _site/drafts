@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Straw in a Haystack</title>
+    <link rel="alternate" type="application/rss+xml" title="RSS"
+      href="http://jaihirsch.github.io/straw-in-a-haystack/">
+    <base href="/straw-in-a-haystack">
+    <link rel="alternate" type="application/rss+xml" href="rss-feed">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Random thoughts on programming, MongoDB, and more by Jai Hirsch">
+
+    <link href="/straw-in-a-haystack/css/bootstrap.css" rel="stylesheet">
+    <link href="/straw-in-a-haystack/css/pygments/default.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px;
+      }
+    </style>
+    <link href="/straw-in-a-haystack/css/bootstrap-theme.css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>    
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-header">
+        <a class="brand" href="http://jaihirsch.github.io/straw-in-a-haystack/">Straw in a Haystack</a>
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+  
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="/straw-in-a-haystack/">Home</a></li>
+          <li><a href="/straw-in-a-haystack/about">About</a></li>
+        </ul>
+     </div>
+  </nav>
+
+    <div class="container">
+
+<div class="container">
+  <div class="col-xs-8">
+    <h2>Tailing the MongoDB Oplog and Broadcasting With RabbitMQ</h2>
+<p>The MongoDB operations log, or oplog, is a powerful yet somewhat mystifying part of the MongoDB core. 
+The oplog is the basis for replication and understanding its nuances in your production environment is very 
+important for success over the long run.  For more information I recommend reading the 
+<a href="http://docs.mongodb.org/manual/core/replica-set-oplog/" target="new"> official documentation</a>
+<br>
+<p>I have been tinkering with “tailing” the oplog for some time and while reading various blogs, stack 
+overflow questions, and talking with other MongoDB users I decided to write up some of my findings. 
+So what do I mean by tailing the oplog?  A tailable cursor in MongoDB is a query that has had the tailable 
+option added to it.  This causes the cursor to continue “listening” for new data to be returned. This is of 
+interest on the oplog because all operations on the database can be seen here. Thus, we can use the oplog 
+to replicate action to other databases, set up filter alerts, or do anything else we can dream up. In this 
+article I am going to show how to connect to the oplog using java and then send messages based on what is 
+going on in the DB using RabbitMQ. Using messaging in this case will allow us to implement information 
+consumers completely independently of the code base we will be using to produce the messages.
+<br>
+<p>The code in this project should be considered example code and not production quality. All code used in 
+the examples may be found at <a href="https://github.com/JaiHirsch/mongo-tail" target="new">github site</a>
+<br>
+<p>There are plenty of excellent tutorials out there on how to set up tailable cursors and tailing the oplog 
+and I do not claim this will be any better than others. One thing I have found missing from many of them is 
+how to connect into a sharded cluster and auto detect the replica sets inside of it and then begin the 
+tailing automagically.
+<br>
+<p>So, with that in mind, lets take a look at what will be discussed in this writeup. Below you will find the 
+system flow we will be creating. We will be using a sharded replicated MongoDB instance.  We will then use a 
+multithreaded java process to connect into each shard's oplog. Once we open the tailable cursur to each oplog 
+we will then broadcast each operation to RabbitMQ. Why RabbitMQ you ask? By removing the concern of what we 
+will be doing with the MongoDB operations from the tailing program we can seperate our concerns. We can attach 
+any sort of consumer to the RabbitMQ server we like. Perhaps we want to replicate the MongoDB data to MySQL or 
+simply set up scanners to watch for specific information flowing through the system. In the example code we will
+ be using RabbitMQ routing keys to divert differt types of MongoDB operations to different queues. The examples 
+are designed to all run in a local environment and when kept to a small scale do run on my laptop.
+<br><br>
+<img src="/straw-in-a-haystack/images/tailable-mongo-rabbit.png" alt="Tailing MongoDB Oplog to RabbitMQ">
+<br><br>
+<p>To initialte the sharded replicated MongoDB environment I am using a <a href="https://github.com/JaiHirsch/mongo-tail
+/blob/master/mongo-tail/init_sharded_env.sh" target="new">script</a> written by Andrew Erlichson for MongoDB's
+online training courses (which I highly recomment). A windows version may also be found <a href="https://github.com
+/JaiHirsch/mongo-tail/blob/master/mongo-tail/init_sharded_env.bat" target="new">here</a>.
+<br>
+<p>RabbitMQ is not the focus of this writeup so I will not be going into detail on how to set it up. For more 
+information I recommend reading their <a href="http://www.rabbitmq.com/" target="new">documentation</a>. At the time 
+of writing I am working with RabbitMQ version 3.3.5 for mac. I will say that getting RabbitMQ running on Windows is 
+possible but not a lot of fun.
+<br>
+<p>On the java front I will be using java 7 and primarily running on mac.  I have tested the tailing code on Windows 7
+and RHEL. There are quite a few topics being covered, so for this exercise I will not be using MongoDB authentication. While 
+this is ok for examples, it is probably not good for your production environment.
+<br>
+<p>OK, now that we have all that out of the way, lets have some fun. We will begin by obtaining a connection into 
+our MongoS. The connection code is located in our main class <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/runner/ShardedReplicaTailer.java" target="new">ShardedReplicaTailer</a>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Properties</span> <span class="n">mongoConnectionProperties</span> <span class="o">=</span> <span class="n">loadProperties</span><span class="o">();</span>
+<span class="n">hostMongoS</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MongoClient</span><span class="o">(</span><span class="n">mongoConnectionProperties</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">&quot;mongosHostInfo&quot;</span><span class="o">));</span></code></pre></div>
+<p>The properties file that is being loaded currently points to localhost. Once we have a connection to a MongoS we can 
+use the <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/util/ShardSetFinder.java" target="new">
+ShardSetFinder</a> to obtain the shard information:
+<br><br>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">DBCursor</span> <span class="n">find</span> <span class="o">=</span> <span class="n">mongoS</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s">&quot;admin&quot;</span><span class="o">).</span><span class="na">getSisterDB</span><span class="o">(</span><span class="s">&quot;config&quot;</span><span class="o">).</span><span class="na">getCollection</span><span class="o">(</span><span class="s">&quot;shards&quot;</span><span class="o">).</span><span class="na">find</span><span class="o">();</span></code></pre></div>
+<br><br>
+<p>To put this line of code into context, the overall software is going to obtain a map of the shards and 
+return it back to the calling code. You may find the entire helper class <a href="">here</a> 
+<ul>
+   <li>From the MongoClient mongoS we get the “admin” DB
+   <li>From the admin DB we get the sister DB “config”
+   <li>From the config DB we get the collection “shards”
+   <li>Finally we issue a find() command that will return cursor containing all of the shards
+</ul>
+
+<p>To put this line of code into context, the overall software is going to obtain a map of the shards and
+return it back to the calling code. You may find the entire helper class <a href="">here</a>
+
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">MongoClient</span><span class="o">&gt;</span> <span class="nf">findShardSets</span><span class="o">(</span><span class="n">MongoClient</span> <span class="n">mongoS</span><span class="o">)</span> <span class="o">{</span>
+   <span class="n">DBCursor</span> <span class="n">find</span> <span class="o">=</span> <span class="n">mongoS</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s">&quot;admin&quot;</span><span class="o">).</span><span class="na">getSisterDB</span><span class="o">(</span><span class="s">&quot;config&quot;</span><span class="o">).</span><span class="na">getCollection</span><span class="o">(</span><span class="s">&quot;shards&quot;</span><span class="o">).</span><span class="na">find</span><span class="o">();</span>
+   <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">MongoClient</span><span class="o">&gt;</span> <span class="n">shardSets</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">MongoClient</span><span class="o">&gt;();</span>
+   <span class="k">while</span> <span class="o">(</span><span class="n">find</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
+      <span class="n">DBObject</span> <span class="n">next</span> <span class="o">=</span> <span class="n">find</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+      <span class="n">String</span> <span class="n">key</span> <span class="o">=</span> <span class="o">(</span><span class="n">String</span><span class="o">)</span> <span class="n">next</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;_id&quot;</span><span class="o">);</span>
+      <span class="n">shardSets</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">getMongoClient</span><span class="o">(</span><span class="n">buildServerAddressList</span><span class="o">(</span><span class="n">next</span><span class="o">)));</span>
+   <span class="o">}</span>
+   <span class="n">find</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+   <span class="k">return</span> <span class="n">shardSets</span><span class="o">;</span>
+<span class="o">}</span></code></pre></div>
+<br>
+<p>Example output when running a local replicated sharded environment:
+
+<code>
+Adding { "_id" : "s0" , "host" : "s0/localhost:37017,localhost:37018,localhost:37019"}<br>
+Adding { "_id" : "s1" , "host" : "s1/localhost:47017,localhost:47018,localhost:47019"}<br>
+Adding { "_id" : "s2" , "host" : “s2/localhost:57017,localhost:57018,localhost:57019"}
+</code>
+
+<p>Here we can see that we have added the shard names (s0 - s2) and their associated server lists (replica sets).
+<br>
+<p>From here we need to create connections into the various replica sets to gain access to the oplog.  In this 
+case we will spawn a thread for each shard so we can tail each shard set independently.
+<br>
+<p>Now the Magic happens as we create a tailable cursor on each replica set.
+<br>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
+
+<span class="n">DBCollection</span> <span class="n">fromCollection</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s">&quot;local&quot;</span><span class="o">).</span><span class="na">getCollection</span><span class="o">(</span><span class="s">&quot;oplog.rs&quot;</span><span class="o">);</span>
+<span class="n">DBObject</span> <span class="n">timeQuery</span> <span class="o">=</span> <span class="n">getTimeQuery</span><span class="o">();</span>
+<span class="n">DBCursor</span> <span class="n">opCursor</span> <span class="o">=</span> <span class="n">fromCollection</span><span class="o">.</span><span class="na">find</span><span class="o">(</span><span class="n">timeQuery</span><span class="o">)</span>
+                                  <span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="k">new</span> <span class="nf">BasicDBObject</span><span class="o">(</span><span class="s">&quot;$natural&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">))</span>
+                                  <span class="o">.</span><span class="na">addOption</span><span class="o">(</span><span class="n">Bytes</span><span class="o">.</span><span class="na">QUERYOPTION_TAILABLE</span><span class="o">)</span>
+                                  <span class="o">.</span><span class="na">addOption</span><span class="o">(</span><span class="n">Bytes</span><span class="o">.</span><span class="na">QUERYOPTION_AWAITDATA</span><span class="o">)</span>
+                                  <span class="o">.</span><span class="na">addOption</span><span class="o">(</span><span class="n">Bytes</span><span class="o">.</span><span class="na">QUERYOPTION_NOTIMEOUT</span><span class="o">);</span>
+<span class="o">...</span>
+
+<span class="kd">private</span> <span class="n">DBObject</span> <span class="nf">getTimeQuery</span><span class="o">()</span> <span class="o">{</span>
+      <span class="k">return</span> <span class="n">lastTimeStamp</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="k">new</span> <span class="nf">BasicDBObject</span><span class="o">()</span> <span class="o">:</span> <span class="k">new</span> <span class="nf">BasicDBObject</span><span class="o">(</span><span class="s">&quot;ts&quot;</span><span class="o">,</span> 
+         <span class="k">new</span> <span class="nf">BasicDBObject</span><span class="o">(</span><span class="s">&quot;$gt&quot;</span><span class="o">,</span><span class="n">lastTimeStamp</span><span class="o">));</span>
+<span class="o">}</span>
+
+<span class="o">...</span></code></pre></div>
+<br>
+<p>Ok, lets break down what went on here.
+<ul>
+   <li>From the MongoClient we got the DB local
+   <li>From the local DB we got the DBCollection “oplog.rs”
+   <li>We then get a timestamp - this is very important as we do not want to reply the entire oplog every time we connect 
+       (at least in this case)
+   <li>We want to sort the return by the “$natural” operator, this will return the documents in the order they appear on disc. 
+       For more information see the <a href="http://docs.mongodb.org/manual/reference/operator/meta/natural/" target="new">MongoDB docs</a>
+   <li>We then add three options to our query - <a href="http://docs.mongodb.org/meta-driver/latest/legacy/mongodb-wire-protocol/" target="new">
+       Full Definition.</a>
+   <ul>
+      <li><div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Bytes</span><span class="o">.</span><span class="na">QUERYOPTION_TAILABLE</span></code></pre></div> - Tailable means cursor is not closed when the last data is retrieved. Rather, 
+          the cursor marks the final object’s position. You can resume using the cursor later, from where it was located, if more data 
+          were received. Like any “latent cursor”, the cursor may become invalid at some point (CursorNotFound) – for example if the 
+          final object it references were deleted.
+      <li><div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Bytes</span><span class="o">.</span><span class="na">QUERYOPTION_AWAITDATA</span></code></pre></div> - Use with TailableCursor. If we are at the end of the data, block for a while 
+          rather than returning no data. After a timeout period, we do return as normal.
+      <li><div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Bytes</span><span class="o">.</span><span class="na">QUERYOPTION_NOTIMEOUT</span></code></pre></div> - The server normally times out idle cursors after an inactivity period (10 
+          minutes) to prevent excess memory use. Set this option to prevent that.
+   </ul>
+</ul>
+<p>At this point we are ready to start tailing. The first thing we will do is use an injection strategy to create our RabbitMQ tailing class. I will not 
+go over this class now, but you may find the code here:  <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/tail/TailTypeInjector.java" 
+target="new">TailTypeInjector</a>. This injection stretegy will allow us to chain tailing operations together at a later date.
+<br>
+<p><h3>Lets take a look at our tailing classes:</h3><br>
+First, we define the following interface: <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/tail/TailType.java" target="new">TailType</a>:
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">TailType</span> <span class="o">{</span>
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">tailOp</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">);</span>
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">();</span>
+<span class="o">}</span></code></pre></div>
+
+<p>Next we difine the following abstract class: <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/tail/types/AbstractGenericType.java" target="new">
+AbstractGenericType</a>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">.</span><span class="na">types</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.mongo.tail.TailType</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">AbstractGenericType</span> <span class="kd">implements</span> <span class="n">TailType</span> <span class="o">{</span>
+   <span class="nd">@Override</span>
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">tailOp</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">)</span> <span class="o">{</span>
+      <span class="k">switch</span> <span class="o">((</span><span class="n">String</span><span class="o">)</span> <span class="n">op</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;op&quot;</span><span class="o">))</span> <span class="o">{</span>
+         <span class="k">case</span> <span class="s">&quot;u&quot;</span><span class="o">:</span>
+            <span class="k">if</span> <span class="o">(</span><span class="s">&quot;repl.time&quot;</span><span class="o">.</span><span class="na">equals</span><span class="o">((</span><span class="n">String</span><span class="o">)</span> <span class="n">op</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;ns&quot;</span><span class="o">)))</span> <span class="o">{}</span>
+            <span class="k">else</span> <span class="nf">handleUpdates</span><span class="o">(</span><span class="n">op</span><span class="o">);</span>
+            <span class="k">break</span><span class="o">;</span>
+         <span class="k">case</span> <span class="s">&quot;i&quot;</span><span class="o">:</span> <span class="n">handleInserts</span><span class="o">(</span><span class="n">op</span><span class="o">);</span>
+            <span class="k">break</span><span class="o">;</span>
+         <span class="k">case</span> <span class="s">&quot;d&quot;</span><span class="o">:</span> <span class="n">handleDeletes</span><span class="o">(</span><span class="n">op</span><span class="o">);</span>
+            <span class="k">break</span><span class="o">;</span>
+         <span class="k">default</span><span class="o">:</span> <span class="n">handleOtherOps</span><span class="o">(</span><span class="n">op</span><span class="o">);</span>
+            <span class="k">break</span><span class="o">;</span>
+      <span class="o">}</span>
+   <span class="o">}</span>  
+   <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">handleOtherOps</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Non-handled operation: &quot;</span> <span class="o">+</span> <span class="n">op</span><span class="o">);</span>
+   <span class="o">}</span>
+   <span class="kd">protected</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">handleDeletes</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">);</span>
+   <span class="kd">protected</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">handleInserts</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">);</span>
+   <span class="kd">protected</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">handleUpdates</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">);</span>
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="o">{}</span>
+<span class="o">}</span></code></pre></div>
+Finally we create our concrete oplog to RabbitMQ tailing classe: 
+<a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/tail/types/RabbitProducerType.java" target="new">RabbitProducerType</a>
+<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">.</span><span class="na">types</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.rabbitmq.client.Channel</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.rabbitmq.client.Connection</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.rabbitmq.client.ConnectionFactory</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">RabbitProducerType</span> <span class="kd">extends</span> <span class="n">AbstractGenericType</span> <span class="o">{</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">EXCHANGE_NAME</span> <span class="o">=</span> <span class="s">&quot;mongo-tail&quot;</span><span class="o">;</span>
+      <span class="kd">private</span> <span class="n">Connection</span> <span class="n">connection</span><span class="o">;</span>
+      <span class="kd">private</span> <span class="n">Channel</span> <span class="n">channel</span><span class="o">;</span>
+      <span class="kd">public</span> <span class="nf">RabbitProducerType</span><span class="o">()</span> <span class="o">{</span>
+         <span class="n">ConnectionFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">ConnectionFactory</span><span class="o">();</span>
+         <span class="n">factory</span><span class="o">.</span><span class="na">setHost</span><span class="o">(</span><span class="s">&quot;localhost&quot;</span><span class="o">);</span>
+         <span class="k">try</span> <span class="o">{</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">newConnection</span><span class="o">();</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="na">createChannel</span><span class="o">();</span>
+            <span class="n">channel</span><span class="o">.</span><span class="na">exchangeDeclare</span><span class="o">(</span><span class="n">EXCHANGE_NAME</span><span class="o">,</span> <span class="s">&quot;direct&quot;</span><span class="o">);</span>
+         <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+      <span class="o">}</span>
+   <span class="o">}</span>
+
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">publishMessage</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">,</span> <span class="n">String</span> <span class="n">routingKey</span><span class="o">)</span> <span class="o">{</span>
+      <span class="k">try</span> <span class="o">{</span>
+         <span class="n">String</span> <span class="n">message</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+         <span class="n">channel</span><span class="o">.</span><span class="na">basicPublish</span><span class="o">(</span><span class="n">EXCHANGE_NAME</span><span class="o">,</span> <span class="n">routingKey</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">message</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+      <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+         <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+      <span class="o">}</span>
+   <span class="o">}</span>
+
+   <span class="nd">@Override</span>
+   <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">handleDeletes</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">publishMessage</span><span class="o">(</span><span class="n">op</span><span class="o">,</span> <span class="s">&quot;d&quot;</span><span class="o">);</span>
+   <span class="o">}</span>  
+   <span class="nd">@Override</span>
+   <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">handleInserts</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">publishMessage</span><span class="o">(</span><span class="n">op</span><span class="o">,</span> <span class="s">&quot;i&quot;</span><span class="o">);</span>
+   <span class="o">}</span>
+
+   <span class="nd">@Override</span>
+   <span class="kd">protected</span> <span class="kt">void</span> <span class="nf">handleUpdates</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">publishMessage</span><span class="o">(</span><span class="n">op</span><span class="o">,</span> <span class="s">&quot;u&quot;</span><span class="o">);</span>
+   <span class="o">}</span>
+
+   <span class="nd">@Override</span>
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="o">{</span>
+      <span class="k">try</span> <span class="o">{</span>
+         <span class="n">channel</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+         <span class="n">connection</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+      <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IOException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+          <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+      <span class="o">}</span>
+   <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
+
+  </div>
+  <div class="col-xs-4">
+    <h3> About Me</h3>
+
+<div class="contact">
+  <p>
+    Jai Hirsch<br />
+    Senior Systems Architect<br />
+    CARFAX<br>
+    hirschjai@gmail.com
+  </p>
+  </div>
+  <div class="contact">
+    <p>
+      <a href="https://github.com/JaiHirsch">github.com/JaiHirsch</a><br />
+      <a href="https://twitter.com/JaiHirsch">twitter.com/JaiHirsch</a><br />
+   </p>
+</div>
+
+<ul>
+  
+    <li><a href="/straw-in-a-haystack//leadership/2014/01/06/thoughts-on-leadership/">Thoughts On Leadership</a></li>
+  
+    <li><a href="/straw-in-a-haystack//mongodb/2014/01/06/mongodb-legacy-migration/">CARFAX vehicle history migration to MongoDB</a></li>
+  
+</ul>
+  </div>
+</div>
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+  /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+    var disqus_shortname = 'strawinahaystack'; // required: replace example with your forum shortname
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+     })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    
+  </body>
+</html>
