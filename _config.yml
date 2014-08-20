@@ -7,7 +7,9 @@ paginate: 10
 
 permalink: pretty
 markdown: redcarpet
-pygments: true
+redcarpet:
+  extensions: ["prettify","no_intra_emphasis", "fenced_code_blocks", "autolink", "tables",     "with_toc_data"]
+highlighter: pygments
 
 # Settings for comments helper
 # Set 'provider' to the comment provider you want to use.
