@@ -18,6 +18,10 @@ of multiple formats that required specific interpretations.  Many of the records
  direct mapping in Java or C and required bitmapping and other fun tricks.  Once we wrote the Java and C JNI algorithms to transform the old
  records to the MongoDB format we began our loads.
 </p>
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/gh-pages
 <p>
 MongoDB does not support OpenVMS and as such we had to use remote MongoS processes to load the data. Using direct inserts to MongoDB we opened 
 up the queues.  The process was immediately computationally bound.  The poor processers on the OpenVMS boxes were running full tilt; we could 

@@ -353,13 +353,30 @@ of multiple formats that required specific interpretations.  Many of the records
  records to the MongoDB format we began our loads.
 &lt;/p&gt;
 
+&lt;h1 id=&quot;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;-head&quot;&gt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt;&amp;lt; HEAD&lt;/h1&gt;
+
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;origin/gh-pages
 &lt;p&gt;
 MongoDB does not support OpenVMS and as such we had to use remote MongoS processes to load the data. Using direct inserts to MongoDB we opened 
 up the queues.  The process was immediately computationally bound.  The poor processers on the OpenVMS boxes were running full tilt; we could 
 barely even get a command prompt to check on the system.  We managed to throttle back the queues so we could get a stable session, but the projected
  extract, transform, and load time was at forty five days.  We let the loads continue but we went back to the drawing board to consider how to 
 solve the computational limitations we had hit.
-&lt;/p&gt; 
+&lt;/p&gt; &lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;&lt;img src=&quot;/straw-in-a-haystack/images/vms_direct_insert.jpg&quot; alt=&quot;Direct load to MongoDB&quot;&gt;&lt;/p&gt;
 
