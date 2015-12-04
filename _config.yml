@@ -4,7 +4,7 @@ baseurl: /straw-in-a-haystack
 url: http://jaihirsch.github.io/straw-in-a-haystack/
 
 paginate: 2
-paginate_path: "/straw-in-a-haystack/archives/page/:num"
+paginate_path: "/archives/page/:num"
 
 gems: [jekyll-paginate]
 
