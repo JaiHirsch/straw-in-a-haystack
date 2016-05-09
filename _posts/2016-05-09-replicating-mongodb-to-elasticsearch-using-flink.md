@@ -27,7 +27,7 @@ projects for tailing the MongoDB oplog and used RabbitMQ to broadcast out change
 <p>This snippet of code is inside a loop that is getting a publisher for every replica set inside of a sharded
     cluster.</p>
 {% highlight java %}
-FindPublisher</Document> oplogPublisher = client.getClient().getDatabase("local")
+FindPublisher<Document> oplogPublisher = client.getClient().getDatabase("local")
     .getCollection("oplog.rs").find().filter(getQueryFilter(tsCollection, client))
     .sort(new Document("$natural", 1)).cursorType(CursorType.TailableAwait);
 {% endhighlight %}
@@ -54,7 +54,7 @@ FindPublisher</Document> oplogPublisher = client.getClient().getDatabase("local"
 </ul>
 </p>
 {% highlight java %}
-private Bson getQueryFilter(MongoCollection</Document> tsCollection, MongoClientWrapper client) {
+private Bson getQueryFilter(MongoCollection<Document> tsCollection, MongoClientWrapper client) {
 return and(ne("ns", "time_d.repl_time"), ne("op", "n"), exists("fromMigrate", false),getFilterLastTimeStamp(tsCollection, client));
 }
 {% endhighlight %}
@@ -64,7 +64,7 @@ return and(ne("ns", "time_d.repl_time"), ne("op", "n"), exists("fromMigrate", fa
     querying MongoDB by the host, this corresponds to each of the host's server info that comes from a the sharded
     cluster.</p>
 {% highlight java %}
-private Bson getFilterLastTimeStamp(MongoCollection</Document> tsCollection, MongoClientWrapper client) {
+private Bson getFilterLastTimeStamp(MongoCollection<Document> tsCollection, MongoClientWrapper client) {
     Document lastTimeStamp = tsCollection.find(new Document("host", client.getHost())).limit(1).first();
     return getTimeQuery(lastTimeStamp == null ? null : (BsonTimestamp) lastTimeStamp.get("ts"));
 }
@@ -91,8 +91,8 @@ private static final String OPLOG_ID = "h";
 
 ...
 
-private void bindPublisherToObservable(Entry</String, FindPublisher</Document>> oplogPublisher,
-    ExecutorService executor, MongoCollection</Document> tsCollection) {
+private void bindPublisherToObservable(Entry<String, FindPublisher<Document>> oplogPublisher,
+    ExecutorService executor, MongoCollection<Document> tsCollection) {
     RxReactiveStreams.toObservable(oplogPublisher.getValue())
       .subscribeOn(Schedulers.from(executor)).subscribe(t -> {
         try {
@@ -101,8 +101,8 @@ private void bindPublisherToObservable(Entry</String, FindPublisher</Document>> 
     });
 }
 
-private void putOperationOnOpsQueue(Entry</String, FindPublisher</Document>> publisher,
-    MongoCollection</Document> tsCollection, Document t) throws InterruptedException {
+private void putOperationOnOpsQueue(Entry<String, FindPublisher<Document>> publisher,
+    MongoCollection<Document> tsCollection, Document t) throws InterruptedException {
     updateHostOperationTimeStamp(tsCollection, t.get(OPLOG_TIMESTAMP, BsonTimestamp.class), publisher.getKey());
     putOperationOnOpsQueueIfFullyReplicated(t);
 }
@@ -124,8 +124,8 @@ private void putOperationOnOpsQueueIfFullyReplicated(Document t) throws Interrup
 {% highlight java %}
 public static void main(String[] args) throws Exception {
     StreamExecutionEnvironment see = StreamExecutionEnvironment.getExecutionEnvironment();
-    DataStream</Document> ds = see.addSource(new MongoDBOplogSource("host", port));
-    ds.addSink(new PrintSinkFunction</Document>());
+    DataStream<Document> ds = see.addSource(new MongoDBOplogSource("host", port));
+    ds.addSink(new PrintSinkFunction<Document>());
     ds.addSink(new ElasticsearchEmbeddedNodeSink("cluster.name").getElasticSink());
     see.execute("MongoDB Sharded Oplog Tail");
 }
