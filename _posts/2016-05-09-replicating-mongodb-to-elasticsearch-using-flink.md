@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Replicating the MongoDB oplog to Elasticsearch using Apache Flink"
-categories: mongoDB, elasticsearch, apache flink
+categories: mongoDB
 ---
 <h2>Replicating the MongoDB oplog to Elasticsearch using Apache Flink</h2>
 <p>I have been tinkering around with RxJava and reactive streams lately, and I decided to revisit one of my older
