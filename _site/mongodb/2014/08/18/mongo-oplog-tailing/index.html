@@ -118,8 +118,8 @@ this is ok for examples, it is probably not good for your production environment
 <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/runner/
 ShardedReplicaTailer.java" target="new">ShardedReplicaTailer</a></p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Properties</span> <span class="n">mongoConnectionProperties</span> <span class="o">=</span> <span class="n">loadProperties</span><span class="o">();</span>
-<span class="n">hostMongoS</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MongoClient</span><span class="o">(</span><span class="n">mongoConnectionProperties</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">&quot;mongosHostInfo&quot;</span><span class="o">));</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">Properties</span> <span class="n">mongoConnectionProperties</span> <span class="o">=</span> <span class="n">loadProperties</span><span class="o">();</span>
+<span class="n">hostMongoS</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">MongoClient</span><span class="o">(</span><span class="n">mongoConnectionProperties</span><span class="o">.</span><span class="na">getProperty</span><span class="o">(</span><span class="s">&quot;mongosHostInfo&quot;</span><span class="o">));</span></code></pre></figure>
 
 <p><br>
 <h3>Now we get the shard info for the cluster</h3>
@@ -129,7 +129,7 @@ use the <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/
 ShardSetFinder</a> to obtain the shard information:
 <br></p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">DBCursor</span> <span class="n">find</span> <span class="o">=</span> <span class="n">mongoS</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s">&quot;admin&quot;</span><span class="o">).</span><span class="na">getSisterDB</span><span class="o">(</span><span class="s">&quot;config&quot;</span><span class="o">).</span><span class="na">getCollection</span><span class="o">(</span><span class="s">&quot;shards&quot;</span><span class="o">).</span><span class="na">find</span><span class="o">();</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">DBCursor</span> <span class="n">find</span> <span class="o">=</span> <span class="n">mongoS</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s">&quot;admin&quot;</span><span class="o">).</span><span class="na">getSisterDB</span><span class="o">(</span><span class="s">&quot;config&quot;</span><span class="o">).</span><span class="na">getCollection</span><span class="o">(</span><span class="s">&quot;shards&quot;</span><span class="o">).</span><span class="na">find</span><span class="o">();</span></code></pre></figure>
 
 <p><br>
 <p>To put this line of code into context, the overall software is going to obtain a map of the shards and 
@@ -142,7 +142,7 @@ return it back to the calling code.
 </ul>
 <p>Here is the code block that is building the map of shard names to mongo clients.</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">MongoClient</span><span class="o">&gt;</span> <span class="nf">findShardSets</span><span class="o">(</span><span class="n">MongoClient</span> <span class="n">mongoS</span><span class="o">)</span> <span class="o">{</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">MongoClient</span><span class="o">&gt;</span> <span class="nf">findShardSets</span><span class="o">(</span><span class="n">MongoClient</span> <span class="n">mongoS</span><span class="o">)</span> <span class="o">{</span>
    <span class="n">DBCursor</span> <span class="n">find</span> <span class="o">=</span> <span class="n">mongoS</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s">&quot;admin&quot;</span><span class="o">).</span><span class="na">getSisterDB</span><span class="o">(</span><span class="s">&quot;config&quot;</span><span class="o">).</span><span class="na">getCollection</span><span class="o">(</span><span class="s">&quot;shards&quot;</span><span class="o">).</span><span class="na">find</span><span class="o">();</span>
    <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">MongoClient</span><span class="o">&gt;</span> <span class="n">shardSets</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">MongoClient</span><span class="o">&gt;();</span>
    <span class="k">while</span> <span class="o">(</span><span class="n">find</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
@@ -152,7 +152,7 @@ return it back to the calling code.
    <span class="o">}</span>
    <span class="n">find</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
    <span class="k">return</span> <span class="n">shardSets</span><span class="o">;</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p><br>
 <p>Example output when running a local replicated sharded environment:</p>
@@ -176,7 +176,7 @@ specific shard and use the shard name (the map key) for this.
 <br>
 Code excerpt from: <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/runner/OplogTail.java" target="new">OplogTail</a> </p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
 
 <span class="n">DBCollection</span> <span class="n">fromCollection</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span><span class="s">&quot;local&quot;</span><span class="o">).</span><span class="na">getCollection</span><span class="o">(</span><span class="s">&quot;oplog.rs&quot;</span><span class="o">);</span>
 <span class="n">DBObject</span> <span class="n">timeQuery</span> <span class="o">=</span> <span class="n">getTimeQuery</span><span class="o">();</span>
@@ -192,7 +192,7 @@ Code excerpt from: <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/
          <span class="k">new</span> <span class="nf">BasicDBObject</span><span class="o">(</span><span class="s">&quot;$gt&quot;</span><span class="o">,</span><span class="n">lastTimeStamp</span><span class="o">));</span>
 <span class="o">}</span>
 
-<span class="o">...</span></code></pre></div>
+<span class="o">...</span></code></pre></figure>
 
 <p><br>
 <p>Ok, lets break down what went on here.
@@ -231,19 +231,19 @@ target="new">TailTypeInjector</a>. This injection stretegy will allow us to chai
 <p><h3>Lets take a look at our tailing classes:</h3><br>
 First, we define the following interface: <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/tail/TailType.java" target="new">TailType</a>:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">;</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">;</span>
 
 <span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
 
 <span class="kd">public</span> <span class="kd">interface</span> <span class="nc">TailType</span> <span class="o">{</span>
    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">tailOp</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">);</span>
    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">();</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p><p>Next we difine the following abstract class: <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/tail/types/AbstractGenericType.java" target="new">
 AbstractGenericType</a></p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">.</span><span class="na">types</span><span class="o">;</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">.</span><span class="na">types</span><span class="o">;</span>
 
 <span class="kn">import</span> <span class="nn">org.mongo.tail.TailType</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
@@ -271,12 +271,12 @@ AbstractGenericType</a></p>
    <span class="kd">protected</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">handleInserts</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">);</span>
    <span class="kd">protected</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">handleUpdates</span><span class="o">(</span><span class="n">DBObject</span> <span class="n">op</span><span class="o">);</span>
    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="o">{}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p>Finally we create our concrete oplog to RabbitMQ tailing classe: 
 <a href="https://github.com/JaiHirsch/mongo-tail/blob/master/mongo-tail/src/main/java/org/mongo/tail/types/RabbitProducerType.java" target="new">RabbitProducerType</a></p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">.</span><span class="na">types</span><span class="o">;</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">mongo</span><span class="o">.</span><span class="na">tail</span><span class="o">.</span><span class="na">types</span><span class="o">;</span>
 
 <span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
@@ -334,7 +334,7 @@ AbstractGenericType</a></p>
           <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
       <span class="o">}</span>
    <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <h3>Thank you</h3>
 
@@ -365,13 +365,15 @@ post a higher quality video soon.
 
 <ul>
   
+    <li><a href="/straw-in-a-haystack//mongodb,/elasticsearch,/apache/flink/2016/05/09/replicating-mongodb-to-elasticsearch-using-flink/">Replicating the MongoDB oplog to Elasticsearch using Apache Flink</a></li>
+  
+    <li><a href="/straw-in-a-haystack//mongodb/2016/02/15/gridfs-duplicate-files/">Finding Duplicate Files in GridFS</a></li>
+  
+    <li><a href="/straw-in-a-haystack//mongodb/2015/12/04/mongodb-document-validation/">Thoughts on MongoDB 3.2 Document Validation</a></li>
+  
     <li><a href="/straw-in-a-haystack//mongodb/2014/09/16/generate-bson-files-with-java/">Generating BSON files with java</a></li>
   
     <li><a href="/straw-in-a-haystack//mongodb/2014/08/18/mongo-oplog-tailing/">Tailing the MongoDB oplog and RabbitMQ</a></li>
-  
-    <li><a href="/straw-in-a-haystack//leadership/2014/01/06/thoughts-on-leadership/">Thoughts On Leadership</a></li>
-  
-    <li><a href="/straw-in-a-haystack//mongodb/2014/01/06/mongodb-legacy-migration/">CARFAX vehicle history migration to MongoDB</a></li>
   
 </ul>
 

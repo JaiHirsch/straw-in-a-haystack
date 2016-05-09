@@ -73,7 +73,7 @@ Many legacy systems may send something like a .csv file with something like:
 <br><br>
 We would then need a file descriptor of some sort to interpret the file, historically in xml:
 
-<div class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<figure class="highlight"><pre><code class="language-xml" data-lang="xml"><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
 <span class="nt">&lt;fields&gt;</span>
    <span class="nt">&lt;field-1&gt;</span>
       <span class="nt">&lt;field-name&gt;</span>f_name<span class="nt">&lt;/field-name&gt;</span>
@@ -88,7 +88,7 @@ We would then need a file descriptor of some sort to interpret the file, histori
       <span class="nt">&lt;field-type&gt;</span>Date<span class="nt">&lt;/field-type&gt;</span>
       <span class="nt">&lt;date-format&gt;</span>MM/dd/yyyy<span class="nt">&lt;/date-format&gt;</span>
    <span class="nt">&lt;/field-3&gt;</span>
-<span class="nt">&lt;/fields&gt;</span></code></pre></div>
+<span class="nt">&lt;/fields&gt;</span></code></pre></figure>
 
 
 Or, perhaps we can try to use the file header to carry the information:
@@ -103,7 +103,7 @@ data and requires custom code to ingest the file and load it into MongoDB.
 <h4>Using JSON files that carry their type information with them.</h4>
 <br>
 
-<div class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span>
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span>
    <span class="nt">&quot;names&quot;</span><span class="p">:</span> <span class="p">{</span>
       <span class="nt">&quot;f_name&quot;</span><span class="p">:</span><span class="s2">&quot;Bob&quot;</span><span class="p">,</span>
       <span class="nt">&quot;l_name&quot;</span><span class="p">:</span><span class="s2">&quot;Pants&quot;</span><span class="p">,</span>
@@ -114,7 +114,7 @@ data and requires custom code to ingest the file and load it into MongoDB.
       <span class="nt">&quot;$type&quot;</span><span class="p">:</span><span class="s2">&quot;date&quot;</span><span class="p">,</span>
       <span class="nt">&quot;$date_format&quot;</span><span class="p">:</span><span class="s2">&quot;MM/dd/yyyy&quot;</span>
    <span class="p">}</span>
-<span class="p">}</span></code></pre></div>
+<span class="p">}</span></code></pre></figure>
 
 <p>This is very verbose, but it works well. If we generate a contract with the consuming code on what the $types mean 
 then should be able to safely transmit our JSON files and have our types preserved. The layout of the data should be able to
@@ -142,7 +142,7 @@ Here</a> is an example that uses the <a href="http://api.mongodb.org/java/2.7.2/
 BasicBSONEncoder</a> to write out a BSON file:
 </p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">java.nio.file.Files</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">java.nio.file.Paths</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">java.nio.file.StandardOpenOption</span><span class="o">;</span>
@@ -166,13 +166,13 @@ BasicBSONEncoder</a> to write out a BSON file:
 
    <span class="o">}</span>
 
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p>Here we are using java 7 and the Files helper class to write the encoded MongoDB DBObject to our file an object at a time. 
 <br>
 Lets consider a use case for this strategy, extracting rows from MySQL and loading them into MongoDB. </p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">MySqlDao</span> <span class="kd">implements</span> <span class="n">Closeable</span> <span class="o">{</span>
 
    <span class="kd">private</span> <span class="kd">final</span> <span class="n">Connection</span> <span class="n">conn</span><span class="o">;</span>
@@ -205,7 +205,7 @@ Lets consider a use case for this strategy, extracting rows from MySQL and loadi
       <span class="o">}</span>
    <span class="o">}</span>
 <span class="o">...</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p>Here we are using the meta data carried by the MySQL result set to extract keys and the values are pulled as Object types. The 
 encoder will then maintain the type as extracted from the MySQL database.
@@ -214,7 +214,7 @@ encoder will then maintain the type as extracted from the MySQL database.
 <br>
 The meta data file has uses the following structure:</p>
 
-<div class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span> <span class="nt">&quot;indexes&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="p">{</span> <span class="nt">&quot;v&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;key&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;_id&quot;</span> <span class="p">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="nt">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;_id_&quot;</span><span class="p">,</span> <span class="nt">&quot;ns&quot;</span> <span class="p">:</span> <span class="s2">&quot;test.foo&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nt">&quot;v&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;key&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;abc&quot;</span> <span class="p">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="nt">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;abc_1&quot;</span><span class="p">,</span> <span class="nt">&quot;ns&quot;</span> <span class="p">:</span> <span class="s2">&quot;test.foo&quot;</span> <span class="p">}</span> <span class="p">]</span> <span class="p">}</span></code></pre></div>
+<figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span> <span class="nt">&quot;indexes&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="p">{</span> <span class="nt">&quot;v&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;key&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;_id&quot;</span> <span class="p">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="nt">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;_id_&quot;</span><span class="p">,</span> <span class="nt">&quot;ns&quot;</span> <span class="p">:</span> <span class="s2">&quot;test.foo&quot;</span> <span class="p">},</span> <span class="p">{</span> <span class="nt">&quot;v&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;key&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;abc&quot;</span> <span class="p">:</span> <span class="mi">1</span> <span class="p">},</span> <span class="nt">&quot;name&quot;</span> <span class="p">:</span> <span class="s2">&quot;abc_1&quot;</span><span class="p">,</span> <span class="nt">&quot;ns&quot;</span> <span class="p">:</span> <span class="s2">&quot;test.foo&quot;</span> <span class="p">}</span> <span class="p">]</span> <span class="p">}</span></code></pre></figure>
 
 <p>We can see that this JSON document is an array of indexes.</p>
 
@@ -223,7 +223,7 @@ The meta data file has uses the following structure:</p>
 <p><br>
 <p>First we will use a wrapper around DBObject to map out the key value pairs in the correct format:</p></p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">mport</span> <span class="n">com</span><span class="o">.</span><span class="na">mongodb</span><span class="o">.</span><span class="na">BasicDBObject</span><span class="o">;</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="n">mport</span> <span class="n">com</span><span class="o">.</span><span class="na">mongodb</span><span class="o">.</span><span class="na">BasicDBObject</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
 
 <span class="kd">public</span> <span class="kd">class</span> <span class="nc">MetaData</span> <span class="o">{</span>
@@ -245,12 +245,12 @@ The meta data file has uses the following structure:</p>
    <span class="kd">public</span> <span class="n">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
       <span class="k">return</span> <span class="n">meta</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
    <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p><br>
 <p>Next we need to obtain the index information from the MySQL database:</p></p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
    <span class="kd">public</span> <span class="n">BasicDBList</span> <span class="nf">getIndexInfoForTable</span><span class="o">(</span><span class="n">String</span> <span class="n">schema</span><span class="o">,</span> <span class="n">String</span> <span class="n">tableName</span><span class="o">)</span>
          <span class="kd">throws</span> <span class="n">SQLException</span> <span class="o">{</span>
       <span class="n">BasicDBList</span> <span class="n">rtn</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">BasicDBList</span><span class="o">();</span>
@@ -264,14 +264,14 @@ The meta data file has uses the following structure:</p>
       <span class="o">}</span>
       <span class="k">return</span> <span class="n">rtn</span><span class="o">;</span>
    <span class="o">}</span>
-<span class="o">...</span></code></pre></div>
+<span class="o">...</span></code></pre></figure>
 
 <p>This is a rather simplistic approach for pulling the index information from MySQL and more advanced
 or compound indexes will require additional logic to handle.</p>
 
 <p>Once we have our list of indexes we can pass it along to the meta data file writer:</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="o">...</span>
    <span class="kd">public</span> <span class="kd">static</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">writeMetaDataFile</span><span class="o">(</span><span class="n">String</span> <span class="n">DBName</span><span class="o">,</span>
          <span class="n">String</span> <span class="n">DBCollectionName</span><span class="o">,</span> <span class="n">Indexizer</span> <span class="n">idx</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{</span>
       <span class="n">ensurePathExists</span><span class="o">(</span><span class="n">DBName</span><span class="o">,</span> <span class="n">DBCollectionName</span><span class="o">);</span>
@@ -290,11 +290,11 @@ or compound indexes will require additional logic to handle.</p>
             <span class="n">bw</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
       <span class="o">}</span>
    <span class="o">}</span>
-<span class="o">...</span></code></pre></div>
+<span class="o">...</span></code></pre></figure>
 
 <p>Now we can create a main class to run all of our classes together and create our import file!</p>
 
-<div class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">simple</span><span class="o">.</span><span class="na">mysql</span><span class="o">;</span>
+<figure class="highlight"><pre><code class="language-java" data-lang="java"><span class="kn">package</span> <span class="n">org</span><span class="o">.</span><span class="na">simple</span><span class="o">.</span><span class="na">mysql</span><span class="o">;</span>
 
 <span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
 <span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="o">;</span>
@@ -312,7 +312,7 @@ or compound indexes will require additional logic to handle.</p>
       <span class="n">dao</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
 
    <span class="o">}</span>
-<span class="o">}</span></code></pre></div>
+<span class="o">}</span></code></pre></figure>
 
 <p><p>I hope you have enjoyed my ramblings on importing data into MongoDB. All source code found in these examples
 may be found <a href="https://github.com/JaiHirsch/mongo-bson-writer" target="new">here</a></p>
@@ -338,13 +338,15 @@ may be found <a href="https://github.com/JaiHirsch/mongo-bson-writer" target="ne
 
 <ul>
   
+    <li><a href="/straw-in-a-haystack//mongodb,/elasticsearch,/apache/flink/2016/05/09/replicating-mongodb-to-elasticsearch-using-flink/">Replicating the MongoDB oplog to Elasticsearch using Apache Flink</a></li>
+  
+    <li><a href="/straw-in-a-haystack//mongodb/2016/02/15/gridfs-duplicate-files/">Finding Duplicate Files in GridFS</a></li>
+  
+    <li><a href="/straw-in-a-haystack//mongodb/2015/12/04/mongodb-document-validation/">Thoughts on MongoDB 3.2 Document Validation</a></li>
+  
     <li><a href="/straw-in-a-haystack//mongodb/2014/09/16/generate-bson-files-with-java/">Generating BSON files with java</a></li>
   
     <li><a href="/straw-in-a-haystack//mongodb/2014/08/18/mongo-oplog-tailing/">Tailing the MongoDB oplog and RabbitMQ</a></li>
-  
-    <li><a href="/straw-in-a-haystack//leadership/2014/01/06/thoughts-on-leadership/">Thoughts On Leadership</a></li>
-  
-    <li><a href="/straw-in-a-haystack//mongodb/2014/01/06/mongodb-legacy-migration/">CARFAX vehicle history migration to MongoDB</a></li>
   
 </ul>
 
