@@ -13,7 +13,9 @@ they were having difficulties mocking out the driver.  I had a few meetings canc
 create a testing pattern that could be easily implemented and extended using the Mockito libraries.
 </p>
 <p>A side note before we get started. If you are mocking at the driver layer you may want to take a step back and
-consider why you are doing it. I am not going to dive deep into the philosophy of unit testing. My general rule of
+consider why you are doing it and much of the following code violates the principle of 'Do no mock types you don't own'.
+    However, while I am not going to dive deep into the philosophy of unit testing, I think these testing patterns
+    may be of use to some. My general rule of
 thumb is to only test logic, avoid the file system, and assume that the external systems work as advertised. Avoid
 the pitfalls of only testing mocks for the sake of testing and make sure you set up integration layers to verify
 that the external systems do, in fact, work as advertised.  That being said, all the code for the following examples
