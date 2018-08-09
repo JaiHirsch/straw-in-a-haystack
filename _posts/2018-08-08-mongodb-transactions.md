@@ -228,11 +228,11 @@ public static void main(String[] args) throws IOException {
     changeStreamExecutorService.submit(new ChangeStreamWatcher(dmc
     .getDatabase()));
     {%  endhighlight %}
-    <a href="https://docs.mongodb.com/manual/changeStreams/" target="new">changeStreams</a>
+    <a href="https://docs.mongodb.com/manual/changeStreams/" target="new">Change streams</a>
     were introduced in MongoDB 3.6 and allow one to have an open query against the changes in the database. They
     also make several of my blog posts on oplog tailing mostly old news. (sad face) <br/>
-    ChangeStreams are outside the scope of this post, but we will use them to watch when the database accepts the
-    writes during transactions. The changeStream code may be found
+    Change streams are outside the scope of this post, but we will use them to watch when the database accepts the
+    writes during transactions. The change stream code may be found
     <a href="https://github.com/JaiHirsch/mongo-4-demo/blob/master/src/main/java/org/mongo/ChangeStreamWatcher.java" target="new">here</a>.
 </p>
 <p>
