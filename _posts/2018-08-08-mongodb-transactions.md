@@ -398,11 +398,13 @@ private void transactionRetryLoop(int amount, DemoMongoConnector dmc, String thr
 
         System.out.println(threadName + " complete : " + retryLoop.completedOk());
 
-    } catch (Throwable e) {
+    } catch (Exception e) {
         retryLoop.takeException(e);
-        clientSession.abortTransaction();
-
-        System.out.println(threadName + " Aborting transaction: " + e.getMessage());
+        if (e instanceof MongoException && ((MongoException)e).hasErrorLabel(
+          MongoException.TRANSIENT_TRANSACTION_ERROR_LABEL)) {
+            System.out.println(threadName + " Aborting transaction: " + e.getMessage());
+            clientSession.abortTransaction();
+        } else throw e;
     }
     if (!retryLoop.completedOk()) {
         throw new RuntimeException("Transaction failed after " + MAX_RETRIES
@@ -413,7 +415,20 @@ private void transactionRetryLoop(int amount, DemoMongoConnector dmc, String thr
 <p>
     We made it! The <b>doTransaction</b> method is where the magic finally happens. We begin the transaction, we
     perform an update on the inventory collection, and make an insert to the shipment collection. Finally, we commit
-    the transaction.
+    the transaction.  In the preceding code block we checked for a MongoException with a specific label
+    <b>MongoException.TRANSIENT_TRANSACTION_ERROR_LABEL</b>
+    in the catch statement.  This condition signifies that the transaction has failed due to a <b>TransientTransactionError</b>.
+</p>
+<p>
+    Please note the following code block that updates a document in the inventory collection:
+
+    {% highlight java %}
+    dmc.getInventory().updateOne(clientSession, Filters.eq("sku", "abc123"),
+        Updates.inc("qty", amount));
+    {%  endhighlight %}
+
+    This is the "shared" document for all of the transactions in this demo and is the key to raising the transaction
+    errors we are checking for as each thread attempts to update the <b>qty</b> field for <b>sku "abc123"</b>.
 </p>
 {% highlight java %}
 private void doTransaction(int amount, DemoMongoConnector dmc, String threadName,
